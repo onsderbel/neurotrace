@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+
+# Node
+node_modules/
+
+# IA : fichiers lourds (à partager via Drive/Colab, pas via Git)
+ai/data/
+ai/models/*.pt
+ai/models/*.h5
+ai/models/*.keras
+
+# Stockage hors chaîne : données médicales, jamais dans Git
+storage/cases/*
+!storage/cases/.gitkeep
+
+# Fabric : binaires et wallets
+blockchain/bin/
+blockchain/config/
+blockchain/wallet/
+fabric-samples/
+
+# Divers
+.DS_Store
+*.log
