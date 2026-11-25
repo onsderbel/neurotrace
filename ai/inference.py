@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
     from ai.explainability import overlay_heatmap
     from ai.preprocessing import InvalidImageError, preprocess_file, save_preprocessed_image
+    from ai.validation import validate
 
     ap = argparse.ArgumentParser(description="Analyse d'une image IRM : prétraitement, IA, Grad-CAM")
     ap.add_argument("image")
@@ -148,5 +149,10 @@ if __name__ == "__main__":
     out.mkdir(parents=True, exist_ok=True)
     save_preprocessed_image(pre, out / "preprocessed.png")
     Image.fromarray(overlay_heatmap(pre.image_rgb, cam)).save(out / "gradcam.png")
-    print(json.dumps({"prediction": pred, "explanation": explanation}, ensure_ascii=False, indent=2))
+    validation = validate(pred, pre.summary, explanation)
+    print(json.dumps({"prediction": pred, "explanation": explanation, "validation": validation},
+                     ensure_ascii=False, indent=2))
     print(f"\nImages enregistrées dans {out}/ : preprocessed.png et gradcam.png")
+    print(f"DÉCISION : {validation['status']}")
+    for reason in validation["reasons"]:
+        print(" -", reason)
