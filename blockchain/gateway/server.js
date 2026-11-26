@@ -51,6 +51,18 @@ async function main() {
   const app = express();
   app.use(express.json());
 
+  // Accès réservé : si GATEWAY_API_KEY est définie, chaque requête (sauf /health) doit la fournir
+  const API_KEY = process.env.GATEWAY_API_KEY;
+  app.use((req, res, next) => {
+    if (!API_KEY || req.path === '/health') return next();
+    const given = Buffer.from(req.get('X-API-Key') || '');
+    const wanted = Buffer.from(API_KEY);
+    if (given.length !== wanted.length || !crypto.timingSafeEqual(given, wanted)) {
+      return res.status(401).json({ error: 'Clé API manquante ou invalide' });
+    }
+    next();
+  });
+
   const wrap = (fn) => async (req, res) => {
     try {
       const { status, body } = await fn(req);
@@ -87,7 +99,7 @@ async function main() {
   // JSON mal formé dans le corps de la requête
   app.use((err, req, res, next) => res.status(400).json({ error: `Requête invalide : ${err.message}` }));
 
-  app.listen(PORT, () => console.log(`Gateway NeuroTrace sur http://localhost:${PORT}`));
+  app.listen(PORT, '127.0.0.1', () => console.log(`Gateway NeuroTrace sur http://127.0.0.1:${PORT}`));
 }
 
 main().catch((e) => { console.error('Démarrage impossible :', errMsg(e)); process.exit(1); });

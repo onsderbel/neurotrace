@@ -15,9 +15,14 @@ class BlockchainClient:
         self.url = url.rstrip("/")
         self.timeout = timeout   # une écriture attend la validation du bloc (jusqu'à plusieurs secondes)
 
+    @staticmethod
+    def _headers():
+        key = os.environ.get("GATEWAY_API_KEY")
+        return {"X-API-Key": key} if key else {}
+
     def _call(self, method: str, route: str, **kwargs):
         try:
-            r = requests.request(method, self.url + route, timeout=self.timeout, **kwargs)
+            r = requests.request(method, self.url + route, timeout=self.timeout, headers=self._headers(), **kwargs)
         except requests.ConnectionError:
             raise BlockchainError(f"Service blockchain injoignable ({self.url}) : gateway ou réseau Fabric éteint ?")
         except requests.Timeout:
